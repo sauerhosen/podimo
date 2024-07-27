@@ -228,18 +228,18 @@ async def serve_feed(username, password, podcast_id, region, locale):
             return authenticate()
 
         # Get a list of valid podcasts
-        # try:
-        podcasts = await podcastsToRss(
-            podcast_id, await client.getPodcasts(podcast_id, scraper), locale
-        )
-        # except Exception as e:
-        #     exception = str(e)
-        #     if "Podcast not found" in exception:
-        #         return Response(
-        #             "Podcast not found. Are you sure you have the correct ID?", 404, {}
-        #         )
-        #     logging.error(f"Error while fetching podcasts: {exception}")
-        #     return Response("Something went wrong while fetching the podcasts", 500, {})
+        try:
+            podcasts = await podcastsToRss(
+                podcast_id, await client.getPodcasts(podcast_id, scraper), locale
+            )
+        except Exception as e:
+            exception = str(e)
+            if "Podcast not found" in exception:
+                return Response(
+                    "Podcast not found. Are you sure you have the correct ID?", 404, {}
+                )
+            logging.error(f"Error while fetching podcasts: {exception}")
+            return Response("Something went wrong while fetching the podcasts", 500, {})
         return Response(podcasts, mimetype="text/xml")
 
 
@@ -284,17 +284,18 @@ def extract_audio_url(episode):
 
 async def addFeedEntry(fg, episode, session, locale):
     fe = fg.add_entry()
-    logging.debug(episode)
+    # logging.debug(episode)
     fe.guid(episode["id"])
     fe.title(episode["title"])
     fe.description(episode["description"])
+    fe.pubDate(episode.get("publishDatetime", episode.get("datetime")))
     fe.pubDate(episode["publishDatetime"])
     fe.podcast.itunes_image(episode["imageUrl"])
 
     url, duration = extract_audio_url(episode)
     if url is None:
         return 
-
+    logging.debug("Found podcast '{fe.title}'")
     fe.podcast.itunes_duration(duration)
     content_length, content_type = await urlHeadInfo(session, episode['id'], url, locale)
     fe.enclosure(url, content_length, content_type)
