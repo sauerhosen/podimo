@@ -284,6 +284,7 @@ def extract_audio_url(episode):
 
 async def addFeedEntry(fg, episode, session, locale):
     fe = fg.add_entry()
+    logging.debug(episode)
     fe.guid(episode["id"])
     fe.title(episode["title"])
     fe.description(episode["description"])
