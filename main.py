@@ -294,7 +294,7 @@ async def addFeedEntry(fg, episode, session, locale):
     url, duration = extract_audio_url(episode)
     if url is None:
         return 
-    logging.debug(f"Found podcast '{fe.title}'")
+    logging.debug(f"Found podcast '{episode["title"]}'")
     fe.podcast.itunes_duration(duration)
     content_length, content_type = await urlHeadInfo(session, episode['id'], url, locale)
     fe.enclosure(url, content_length, content_type)
